@@ -16,22 +16,23 @@ library(rstanarm)
 analysis_data <- read_csv("data/analysis_data/analysis_data.csv")
 
 ### Model data ####
-first_model <-
+political_preferences <-
   stan_glm(
-    formula = flying_time ~ length + width,
+    factor(voted_for) ~ gender + education,
     data = analysis_data,
-    family = gaussian(),
+    family = binomial(link = "logit"),
     prior = normal(location = 0, scale = 2.5, autoscale = TRUE),
-    prior_intercept = normal(location = 0, scale = 2.5, autoscale = TRUE),
-    prior_aux = exponential(rate = 1, autoscale = TRUE),
+    prior_intercept = 
+      normal(location = 0, scale = 2.5, autoscale = TRUE),
     seed = 853
   )
 
 
+
 #### Save model ####
 saveRDS(
-  first_model,
-  file = "models/first_model.rds"
+  political_preferences,
+  file = "models/political_preferences_model.rds"
 )
 
 
