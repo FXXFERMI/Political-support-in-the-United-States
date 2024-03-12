@@ -1,0 +1,235 @@
+---
+title: "Income and Gender: Forecasting the American Voter's Choice in 2018"
+author: 
+  - Siqi Fei
+thanks: "Code and data are available at: <https://github.com/FXXFERMI/Political-support-in-the-United-States.git>."
+date: "March 09, 2024"
+date-format: long
+abstract: "In this study, we examined whether it is possible to predict an individual's voting behavior in the 2018 US elections based solely on their income levels and gender. Utilizing a dataset containing voter information and demographic characteristics, we conducted statistical analyses to identify any patterns or correlations. Our findings suggest that, to a certain extent, a person's income and gender can provide predictive insights into their voting preferences, shedding light on the complex interplay between socio-economic factors and political affiliation. Understanding these relationships can help policymakers and political strategists craft more targeted approaches to engage and mobilize voters across different demographic groups, ultimately contributing to a more informed and inclusive democratic process."
+format: pdf
+number-sections: true
+bibliography: references.bib
+header-includes:
+  \usepackage{placeins}
+---
+
+```{r}
+#| include: false
+#| warning: false
+#| message: false
+
+#### Workspace setup ####
+
+# Load necessary libraries for data manipulation, plotting, and Bayesian analysis.
+library(tidyverse)
+library(here)
+library(rstanarm)
+
+```
+
+# Introduction
+
+In the intricate landscape of American politics, unraveling the factors that guide an individual’s voting decisions is a crucial endeavor for scholars and political strategists alike. This paper delves into the 2018 U.S. elections—a time characterized by significant voter turnout and pronounced divisions—to investigate the predictive power of income and gender on electoral choices. Despite extensive research into the multifaceted influences on voting behavior, the explicit relationship between these two demographic variables and political preferences remains insufficiently examined. Our focus on the 2018 electoral cycle is intentional, chosen for its illustration of the deep-seated cleavages within the American electorate and its potential to reveal enduring voting behaviors.
+
+Utilizing data from the Cooperative Congressional Election Study (CCES) [@ces2018], this study employs quantitative methods to explore how variations in income and gender correlate with support for political candidates. The primary estimand of our analysis is the likelihood of voting for a specific political party or candidate based on an individual's income level and gender. Our findings suggest that these factors are not merely peripheral but central to understanding voter behavior, offering new insights into the demographic contours of political allegiance. This research not only enriches the academic discourse on electoral dynamics but also holds practical implications for crafting more nuanced and effective campaign strategies.
+
+The importance of this study lies in its contribution to a more detailed and informed understanding of the American political landscape. By pinpointing income and gender as significant determinants of voting patterns, we provide a basis for future investigations into how these and other demographic factors shape political identities and allegiances.
+
+The paper is organized into six sections, following this introduction. @sec-data describes the dataset and the rationale behind its selection. @sec-model outlines the statistical methods applied to analyze the data. @sec-results presents the key findings of the study, while @sec-discussion interprets these results within the broader context of American politics and voting behavior. Through this structure, we aim to offer a comprehensive examination of how income and gender influence voting decisions in the United States, contributing to the broader discourse on democracy and electoral participation.
+
+# Data {#sec-data}
+
+For this paper, we used data from the 2018 Cooperative Congressional Election Study (CCES) [@ces2018], which we worked with in R [@citeR], a language for statistical computing. The `tidyverse` suite [@citetidyverse], with its various packages like `ggplot2` [@citeggplot], `dplyr` [@citedplyr], `readr` [@citereadr], and `tibble` [@citetibble], made handling the data easier and more precise. We summarized our model results using the `modelsummary` package [@citemodelsummary]. The `dataverse` package [@citedataverse] helped us smoothly download the data, and `testthat` [@citetestthat] made sure our data prep and analysis were solid. The `here` package [@citehere] helped keep our files organized and our analysis reproducible.
+
+Our study focuses on three main data points: family income, gender, and individual voting choices in the 2018 election. We organize income into different ranges to examine the potential effect of earnings on political decisions. Gender is categorized simply into male or female, reflecting the dataset's binary format. Regarding voting choices, we concentrate on whether respondents voted for Trump or Clinton, framing it as a binary outcome.
+
+Before analyzing, we thoroughly clean our data. We remove non-essential information and align income brackets with recognized standards. Any problems with data exception or missing values are resolved, ensuring our dataset is reliable.
+
+We present a figure to illustrate our data's narrative. @fig-vote depicts the voting choices broken down by gender and income levels. This bar chart provides a clear visualization of the number of respondents within each income category and their voting behavior.
+
+```{r}
+#| label: fig-vote
+#| fig-cap: The distribution of presidential preferences, by gender, and income
+#| echo: false
+#| warning: false
+#| message: false
+
+# Loads the analysis dataset from a CSV file
+ces2018 <- read_csv(here("data/analysis_data/analysis_data.csv"))
+
+# create bar plot
+ces2018 |>
+  ggplot(aes(x = income, fill = voted_for)) +
+  stat_count(position = "dodge") +
+  facet_wrap(facets = vars(gender)) +
+  theme_minimal() +
+  labs(
+    x = "Income Level",
+    y = "Number of respondents",
+    fill = "Voted for"
+  ) +
+  coord_flip() +
+  scale_fill_brewer(palette = "Set1") +
+  theme(legend.position = "bottom")
+```
+
+Reviewing the summary statistics, we notice distinct patterns. For example, higher-income individuals show a tendency to support Trump, while lower-income individuals demonstrate varied support for Clinton.
+
+The next parts of the paper will go into more detail about these findings.
+
+# Model {#sec-model}
+
+The goal of our modeling strategy is to illuminate the underlying dynamics between voters' demographics—specifically, income and gender—and their voting behavior in the 2018 U.S. elections. Additionally, we aim to quantify the strength and direction of these relationships.
+
+To dissect these factors, we apply a Bayesian analysis model, allowing us to incorporate prior knowledge and handle uncertainty in a probabilistic framework. We chose this approach due to its flexibility and the rich interpretability of its results. For those interested in the technical specifics and diagnostic checks of our Bayesian model, these details are thoroughly presented in [Appendix -@sec-model-details].
+
+## Model set-up
+
+We denote $y_i$ as the binary outcome where 1 represents a vote for Trump and 0 represents a vote for Clinton. In our model, the predictors include gender and income. We use $\beta_1$ to represent the effect of gender on the probability of voting for Trump, with gender encoded as a binary variable (e.g., 0 for female and 1 for male). Similarly, $\beta_2$ represents the effect of income, categorized into distinct income brackets, on the voting probability.
+
+
+
+\begin{align} 
+y_i|\pi_i &\sim \mbox{Bernoulli}(\pi_i) \\
+\mbox{logit}(\pi_i) &= \beta_0 + \beta_1 \times \text{gender}_i + \beta_2 \times \text{income}_i\\
+\beta_0 &\sim \mbox{Normal}(0, 2.5) \\
+\beta_1 &\sim \mbox{Normal}(0, 2.5) \\
+\beta_2 &\sim \mbox{Normal}(0, 2.5)
+\end{align}
+
+The parameters $\beta_0$,$\beta_1$,$\beta_2$ represent the intercept and the effects of income and gender, respectively, on the log-odds of voting for Trump. A normal prior with mean 0 and standard deviation 2.5 is used for each of these parameters, reflecting a baseline assumption of no effect before observing the data.
+
+We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`.
+
+### Model Justification
+
+Given the economic and social context of the 2018 election, it is reasonable to hypothesize that both income and gender would exert influence on voting decisions. We anticipate that income, as a measure of economic status, could have a significant effect on the choice of a candidate known for advocating policies affecting taxations and business. Similarly, gender might play a role given the differing policy stances of the candidates on issues traditionally seen as gendered in public discourse. Therefore, we posit a positive relationship between higher income brackets and support for Trump, while also considering the potential impact of gender on voting behavior.
+
+The subsequent results section will delve into the outcomes of this Bayesian model, revealing the extent to which income and gender can predict support for Trump in the 2018 U.S. elections.
+
+# Results {#sec-results}
+The results of our analysis, grounded in the 2018 Cooperative Congressional Election Study (CCES)[@ces2018], offer a compelling narrative about the interplay between income, gender, and voter preference in the 2018 U.S. elections. 
+
+Our results, as summarized in @tbl-modelresults, explain the relationship between an individual's likelihood to support Trump in the 2018 election and their gender and income level. The intercept, representing the baseline likelihood for the reference group (here presumably female and the omitted income category), is estimated at 0.44. Gender has a notable effect, with males being less likely by 0.50 to support Trump compared to females, holding other factors constant.
+
+The influence of income on voting preference for Trump is more nuanced. For most of the income brackets, such as those earning between $100,000 to $119,999 or $120,000 to $149,999, the coefficients are negative but small in magnitude and not statistically significant, as indicated by their respective standard errors. However, individuals earning between $200,000 to $249,999 show a markedly higher likelihood (an increase of 0.31) of supporting Trump. Notably, the largest income bracket, $500,000 or more, also indicates a higher likelihood of support for Trump, with a coefficient of 0.28. Conversely, individuals in the lowest income bracket, earning less than $10,000, are more likely by 0.40 to support Trump, which is an interesting contrast to the typical association between income level and political preference.
+
+The model's explanatory power, as indicated by the R^2 value of 0.019, suggests that while gender and income do contribute to the prediction of voting behavior, there is a vast amount of variability left unexplained by these factors alone. Other unobserved variables might also play a significant role in an individual's voting decisions.
+
+The fit of the model, evaluated by criteria such as the Widely Applicable Information Criterion (WAIC) and Leave-One-Out Cross-Validation Information Criterion (LOOIC), suggests that the model is relatively well-calibrated given the complexity of human behavior it aims to capture. However, the modest R-squared value indicates that future research could benefit from incorporating additional predictors to provide a more comprehensive understanding of the factors influencing voter behavior.
+
+In summary, the analysis confirms that gender and income are indeed predictive of voter preference, yet the variability indicates that additional factors also play a significant role.
+```{r}
+#| echo: false
+#| eval: true
+#| warning: false
+#| message: false
+
+library(rstanarm)
+
+# read model
+political_preferences <-
+  readRDS(file = here::here("models/political_preferences_model.rds"))
+```
+
+```{r}
+#| echo: false
+#| label: tbl-modelresults
+#| tbl-cap: "Whether a respondent is likely to vote for Trump based on their gender and income"
+#| warning: false
+
+# summary model
+modelsummary::modelsummary(
+  list(
+    "Support Trump" = political_preferences
+  ),
+  statistic = "mad",
+  fmt = 2
+)
+```
+\newpage
+# Discussion {#sec-discussion}
+
+## Discussion
+
+### Overview
+
+This paper has navigated through the complex terrain of demographic influence on political preference, particularly in the context of the 2018 U.S. elections. By employing a Bayesian framework to assess the impact of income and gender on voting for Trump, the study enhances our quantitative understanding of electoral behavior, addressing an analytical gap in political science literature.
+
+### Gender Dynamics in Political Support
+
+Our research has illuminated the significant role of gender in predicting political preferences. The notable decrease in the likelihood of males voting for Trump, as indicated by the model, adds a quantitative backing to the narrative of gendered political divergence. This gender gap aligns with broader societal discussions on political identity and raises questions about the evolving role of gender in shaping political landscapes.
+
+### Economic Status and Voter Preference
+
+A striking aspect of our findings is the complex association between income and support for Trump. The increased likelihood of individuals with lower and higher incomes to vote for Trump could suggest a cross-cutting appeal among disparate economic demographics, challenging conventional wisdom about income-based voting behavior. This nuanced relationship points to the intricate ways economic status intersects with political ideology.
+
+### Limitations
+
+The limitations of this study are multifaceted. Primarily, the explanatory power of our model, as indicated by a low R-squared value, suggests that the variables of income and gender, while significant, do not capture the full spectrum of factors influencing voter decisions. Our reliance on binary gender classification and broad income categories may oversimplify the diversity and intricacy of these demographic factors. Additionally, the data's cross-sectional nature restricts our ability to explore causality and changes over time.
+
+### Future Research
+
+Moving forward, it is clear that further exploration is needed to deepen our understanding of voter behavior. Incorporating additional demographic variables, such as ethnicity, educational background, and urban versus rural residency, could offer more detailed insights. A longitudinal approach could track changes over multiple election cycles, providing a richer context for understanding voter dynamics.
+
+Integrating qualitative methodologies could offer a layer of depth to the motivations and perceptions behind the quantifiable trends. Surveys, interviews, and focus groups could unveil the personal narratives and societal influences that lie beneath statistical patterns.
+
+To address the limitations around the categorization of gender, future research should consider a more inclusive approach, recognizing and incorporating the full spectrum of gender identities. Similarly, more nuanced economic data could provide a clearer picture of how personal finances translate into political decisions.
+
+### Conclusion
+
+This study serves as a stepping stone toward a more comprehensive comprehension of the multifaceted influences on voter behavior. As we peel back the layers of demographic impacts, we pave the way for more informed political discourse and strategy development. The journey of discovery is ongoing, and each successive study builds upon the foundation of understanding laid by its predecessors, contributing to a collective effort to decipher the enigma of voter behavior in the American democratic process.
+
+\newpage
+
+\appendix
+
+# Appendix {-}
+
+# Model details {#sec-model-details}
+```{r}
+#| label: fig-plot
+#| fig-cap: Credible intervals for predictors of support for Trump
+#| echo: false
+#| warning: false
+#| message: false
+political_preferences <- readRDS(here("models/political_preferences_model.rds"))
+
+# Extracting posterior intervals for coefficients
+post_intervals <- posterior_interval(political_preferences, prob = 0.9)
+
+# Converting to a data frame
+cred_intervals <- as.data.frame(post_intervals)
+
+cred_intervals$variable <- rownames(cred_intervals)
+
+# Renaming the cols
+colnames(cred_intervals) <- c("lower_90", "upper_90", "variable")
+
+cred_intervals_long <- tidyr::pivot_longer(
+  cred_intervals,
+  cols = c(lower_90, upper_90),
+  names_to = "limit",
+  values_to = "value"
+)
+
+# create a point estimate which is the average of the upper and lower limit for each variable
+cred_intervals_long <- cred_intervals_long %>%
+  group_by(variable) %>%
+  summarise(
+    estimate = mean(value[limit == "lower_90" | limit == "upper_90"]),
+    lower_90 = value[limit == "lower_90"],
+    upper_90 = value[limit == "upper_90"]
+  )
+
+ggplot(cred_intervals_long, aes(x = variable, y = estimate)) +
+  geom_pointrange(aes(ymin = lower_90, ymax = upper_90)) +
+  labs(x = "Variable", y = "90% Credibility Interval") +
+  coord_flip() +  # Flip the axes
+  theme_minimal()
+
+```
+
+\newpage
+
+# References
