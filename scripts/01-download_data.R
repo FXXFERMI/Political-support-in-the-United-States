@@ -9,7 +9,7 @@
 
 
 #### Workspace setup ####
-library(opendatatoronto)
+library(dataverse)
 library(tidyverse)
 # [...UPDATE THIS...]
 
@@ -25,13 +25,11 @@ ces2020 <-
   ) |>
   select(votereg, CC20_410, gender, educ)
 
-write_csv(ces2020, "ces2020.csv")
-
 ###########################待改！！！！######################
 
 #### Save data ####
 # [...UPDATE THIS...]
 # change the_raw_data to whatever name you assigned when you downloaded it.
-write_csv(the_raw_data, "inputs/data/raw_data.csv") 
+write_csv(ces2020, "data/raw_data/raw_data.csv") 
 
          
