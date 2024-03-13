@@ -19,6 +19,7 @@ library(rstanarm) # Loads the 'rstanarm' package for Bayesian regression analysi
 analysis_data <- read_csv("data/analysis_data/analysis_data.csv")
 
 ### Model data ####
+
 # Fits a Bayesian logistic regression model to the analysis data.
 political_preferences <-
   stan_glm(
