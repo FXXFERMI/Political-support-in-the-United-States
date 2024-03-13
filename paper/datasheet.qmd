@@ -1,5 +1,5 @@
 ---
-title: "Datasheet for 'Income and Gender: Forecasting the American Voter's Choice in 2018` Dataset"
+title: "Datasheet for 'Income and Gender: Forecasting the American Voters' Choices in 2018` Dataset"
 author: 
   - Siqi Fei
 thanks: "Code and data are available at: <https://github.com/FXXFERMI/Political-support-in-the-United-States.git>"
@@ -10,9 +10,6 @@ format: pdf
 number-sections: true
 bibliography: references.bib
 ---
-
-Extract of the questions from @gebru2021datasheets.
-
 
 **Motivation**
 
@@ -146,10 +143,8 @@ Extract of the questions from @gebru2021datasheets.
 	- Data involving human subjects, especially data collected in the United States, must comply with privacy laws and ethical standards, such as those outlined by the Institutional Review Board (IRB). While not explicitly regulatory restrictions, these standards dictate how data can be collected, used, and shared to protect participants' privacy. Specific export controls or other regulatory restrictions would typically be mentioned in the dataset's access conditions if applicable.
 6. *Will older versions of the dataset continue to be supported/hosted/maintained? If so, please describe how. If not, please describe how its obsolescence will be communicated to dataset consumers.*
 	- Users interested in the CCES dataset should review the most current documentation available from the official source for details on access, usage rights, and any restrictions. This ensures compliance with legal and ethical standards and supports the integrity of research conducted with the dataset. Prospective users may need to agree to specific terms of use, which could include provisions for privacy protection, data security, and limitations on the use of the data for specific purposes.
-7. *If others want to extend/augment/build on/contribute to the dataset, is there a mechanism for them to do so? If so, please provide a description. Will these contributions be validated/verified? If so, please describe how. If not, why not? Is there a process for communicating/distributing these contributions to dataset consumers? If so, please provide a description.*
+7. *Any other comments?*
 	- None.
-8. *Any other comments?*
-	- Mome.
 
 
 \newpage
