@@ -19,7 +19,7 @@ This repository contains all materials related to the paper "Income and Gender: 
 - `paper/`: 
   - `references.bib`: Bibliography file containing all the citation information used within the paper.
   - `paper.qmd`: Quarto source file for the main paper document. This markdown file includes all text, code, and commands to compile the paper.
-  - `paper.pdf`: The compiled and formatted version of the paper, ready for distribution or publication.
+  - `Income and Gender: Forecasting the U.S. Voters' Choices in 2018.pdf`: The compiled and formatted version of the paper, ready for distribution or publication.
   - `datasheet.qmd`: Quarto source file containing detailed data descriptions, metadata, and other relevant information that supports the paper's content.
   - `datasheet.pdf`: Compiled version of the datasheet, providing an accessible format for readers who wish to understand the data in greater depth.
 
