@@ -62,4 +62,4 @@ Thanks to Brian Schaffner, Stephen Ansolabehere, and Sam Luks for the CCES 2018 
 For any queries regarding this study, please contact Siqi Fei at fermi.fei@mail.utoronto.ca. Further materials and updates can be found at [GitHub repository](https://github.com/FXXFERMI/Political-support-in-the-United-States.git).
 
 # LLM usage
-This project used Large Language Models at datasheet.qmd and paper.qmd. Some aspects of the R scripts, as well as parts of the abstract and introduction were written with the help of Chat-GPT4 and the entire chat history is available in 'other/llm/usage.txt'
+This project used Large Language Models at datasheet.qmd. Some aspects of the abstract and answers were written with the help of Chat-GPT4 and the entire chat history is available in 'other/llm/usage.txt'
