@@ -1,4 +1,4 @@
-# Income and Gender: Forecasting the American Voter's Choice in 2018
+# Income and Gender: Forecasting the American Voters' Choices in 2018
 
 # Overview
 This repository contains all materials related to the paper "Income and Gender: Forecasting the American Voters' Choices in 2018," authored by Siqi Fei. The study examines the predictive power of income and gender on the voting behavior in the 2018 US elections using the Cooperative Congressional Election Study (CCES) 2018 dataset.
